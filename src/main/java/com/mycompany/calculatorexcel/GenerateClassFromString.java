@@ -27,18 +27,14 @@ import javax.tools.ToolProvider;
  */
 public class GenerateClassFromString {
     public static Double createClassOf(String s){
-        //createClass(code);
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
         StringWriter writer = new StringWriter();
         PrintWriter out = new PrintWriter(writer);
         String code = "public class AnotherClass {";
-        //code = code +"  public static void main(String args[]) {";
         code = code +"  public static Double main(String args[]) {";
-//        code = code +"    System.out.println(\"This is in another java file\");";
         code = code + "Double rezult ;";
         code = code +  s;
-    //    code = code +"    System.out.println(\" value of s "+ s+" is \"+rezult.toString());";
         code = code +"    System.out.println(\" value of s is \"+rezult.toString());";
         code = code +"    return rezult;";
         code = code +"  }";
@@ -47,7 +43,6 @@ public class GenerateClassFromString {
         out.flush();
         out.close();
         JavaFileObject file1 = new JavaSourceFromString("AnotherClass", writer.toString());
-        //System.out.println(file1);
 
         Iterable<? extends JavaFileObject> compilationUnits = Arrays.asList(file1);
         JavaCompiler.CompilationTask task = compiler.getTask(null, null, diagnostics, null, null, compilationUnits);
@@ -66,7 +61,6 @@ public class GenerateClassFromString {
                 Method m = my.getMethod("main", new Class[] { String[].class });
                 Object o = my.newInstance();
                 // call selected method and get the rezult
-        //        System.out.println("cacculation rezult is "+m.invoke(o, new Object[] { new String[0] }).toString());
                 rez = (Double) m.invoke(o, new Object[] { new String[0] });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -76,7 +70,7 @@ public class GenerateClassFromString {
     }
     
     public static boolean createBooleanClassOf(String s){
-        //createClass(code);
+
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
         StringWriter writer = new StringWriter();
@@ -85,7 +79,6 @@ public class GenerateClassFromString {
         code = code +"  public static boolean main(String args[]) {";
         code = code + "boolean rezult ;";
         code = code +  s;
-       // code = code +"    System.out.println(\" value of s "+ s+" is \"+String.valueOf(rezult));";
         code = code +"    System.out.println(\" value of s is \"+String.valueOf(rezult));";
         code = code +"    return rezult;";
         code = code +"  }";
@@ -112,7 +105,6 @@ public class GenerateClassFromString {
                 Method m = my.getMethod("main", new Class[] { String[].class });
                 Object o = my.newInstance();
                 // call selected method and get the rezult
-        //        System.out.println("cacculation rezult is "+m.invoke(o, new Object[] { new String[0] }).toString());
                 rez = (boolean) m.invoke(o, new Object[] { new String[0] });
             } catch (Exception e) {
                 e.printStackTrace();

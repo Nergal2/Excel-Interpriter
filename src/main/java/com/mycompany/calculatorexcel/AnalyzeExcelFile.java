@@ -69,34 +69,9 @@ public class AnalyzeExcelFile {
                         System.out.println("NEW Excel formula " + cell.getCellFormula()+" Last evaluated as: " + cell.getStringCellValue());
                         System.out.println("Formula cells chamged to " +processStringsOfFormula(processNumbersOfFormula(processNamedCells(cell.getCellFormula())))); // replace cells with known numbers and strings
                     }
-               //     System.out.println("NEW Excel formula " + cell.getCellFormula()+" Last evaluated as: " + cell.getNumericCellValue());
-              //      System.out.println("Formula cells chamged to " +processStringsOfFormula(processNumbersOfFormula(cell))); // replace cells with known numbers
-            //        String form = processNumbersOfFormula(cell);
-            //        form = processStringsOfFormula(form);
-                    
-          //          System.out.println("Formula evaluated to " +createClassOf(processFormula(processNumbersOfFormula(cell)))); // process formula                
-
-//                    FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-//                    // CellValue
-//                    HSSFCell cell1 = sheet.getRow(0).getCell(0);
-//                    cell1.setCellValue(cell1.getNumericCellValue() +50);
-//                    cell.setCellFormula("SUM(A1:A2)");
-//                    CellValue cellValue = evaluator.evaluate(cell);
-//                    Double value = cellValue.getNumberValue();
-//                    System.out.println("evaluator value is "+ value.toString());
                 }
-
-                
                 String type = converter(cell.toString());
                 rezult = rezult+" "+type;
-        //        if (type.contains("number")) {
-        //            table.put(String.valueOf(alplabet[cell.getColumnIndex()])+String.valueOf(cell.getRowIndex()+1), cell.getNumericCellValue());
-        //            System.out.println("put " + String.valueOf(alplabet[cell.getColumnIndex()])+String.valueOf(cell.getRowIndex()+1)+ " "+ cell.getNumericCellValue());
-        //        }
-                
-        //        if (type.contains("cell address")) {
-        //            System.out.println(cell.toString()+" is "+table.get(cell.toString()));
-        //        }
             }
         }
         return rezult;
@@ -112,24 +87,6 @@ public class AnalyzeExcelFile {
             System.out.println("EXPRSK-iteration value is "+ rezult);
             rezult = processFormula(incFormula.replace(mEXPRSK.group(), createClassOf(rezult).toString()));
         } else {
-
-//        Pattern pEXPR = Pattern.compile("[0-9.]*[\\*\\/][0-9.]*");
-//        Matcher mEXPR = pEXPR.matcher(incFormula);
-//        if (mEXPR.find()){
-//            rezult =  "rezult= "+ mEXPR.group()+";";
-//            System.out.println("EXPR-iteration value is "+ rezult);
-//            rezult = processFormula(incFormula.replace(mEXPR.group(), createClassOf(rezult).toString()));
-//        } else        
-//        {
-//            Pattern pEXPR2 = Pattern.compile("[0-9.]*[\\+\\-][0-9.]*");
-//            Matcher mEXPR2 = pEXPR2.matcher(incFormula);
-//            if (mEXPR2.find()){
-//                rezult =  "rezult= "+ mEXPR.group()+";";
-//                System.out.println("EXPR-iteration value is "+ rezult);
-//                rezult = processFormula(incFormula.replace(mEXPR2.group(), createClassOf(rezult).toString()));
-//            }
-//        }
-
             // process AND expression
             //Matcher mAND = Pattern.compile("AND\\([^A-Z,]*(,[^A-Z\\),]*)*\\)").matcher(incFormula);
             Matcher mAND = Pattern.compile("AND\\((?!OR|AND|\\()[^,]*(,(?!OR|AND|\\()[^\\\\),]*)*\\)").matcher(incFormula);
@@ -144,61 +101,47 @@ public class AnalyzeExcelFile {
                 rezult = processFormula(incFormula.replace(mAND.group(), String.valueOf(createBooleanClassOf(rezult))));
             }
             else {
+                // process OR expression
+                //    Matcher mOR = Pattern.compile("OR\\([^A-Z,]*(,[^A-Z\\),]*)*\\)").matcher(incFormula);
+                Matcher mOR = Pattern.compile("OR\\((?!OR|AND|\\()[^,]*(,(?!OR|AND|\\()[^\\\\),]*)*\\)").matcher(incFormula);
+                if (mOR.find()){
+                    String tempOrFormula = mOR.group().replaceFirst("OR\\(", "");
+                    tempOrFormula = tempOrFormula.replaceAll(",", " )|( ");
+                    tempOrFormula = tempOrFormula.replaceAll("=", " == ");
+                    tempOrFormula = tempOrFormula.replaceAll("<>", " != ");
 
-            // process OR expression
-        //    Matcher mOR = Pattern.compile("OR\\([^A-Z,]*(,[^A-Z\\),]*)*\\)").matcher(incFormula);
-            Matcher mOR = Pattern.compile("OR\\((?!OR|AND|\\()[^,]*(,(?!OR|AND|\\()[^\\\\),]*)*\\)").matcher(incFormula);
-            if (mOR.find()){
-                String tempOrFormula = mOR.group().replaceFirst("OR\\(", "");
-                tempOrFormula = tempOrFormula.replaceAll(",", " )|( ");
-                tempOrFormula = tempOrFormula.replaceAll("=", " == ");
-                tempOrFormula = tempOrFormula.replaceAll("<>", " != ");
+                    rezult = "rezult = ("+tempOrFormula+ " ;";
+                    System.out.println("OR-iteration value is "+ rezult);
+                    rezult = processFormula(incFormula.replace(mOR.group(), String.valueOf(createBooleanClassOf(rezult))));
+                }
+                else {
+                    // process if expression
+                    //   Pattern pIf = Pattern.compile("IF\\([^\\(\\),]*,[^\\(\\),]*,[^\\(,\\)]*\\)");
+                    Matcher mIf = Pattern.compile("IF\\([^\\(\\),]*,[^A-Z,\\(]*,[^A-Z,\\(\\)]*\\)").matcher(incFormula);
+                    if (mIf.find()){
+                        String tempFormula = mIf.group();
+                        //if (tempFormula.matches("IF\\([^\\=<>A-Z]*=[^\\=,<>]*,[^A-Z,]*,[^A-Z,\\)]*\\)")){
+                        if (tempFormula.matches("IF\\([^\\=<>]*=[^\\=,<>]*,[^A-Z,]*,[^A-Z,\\)]*\\)")){
+                            tempFormula =  tempFormula.replaceFirst("=", "==");
+                        }
+                        if (tempFormula.matches("IF\\([^\\=A-Z]*<>[^\\=,]*,[^A-Z,]*,[^A-Z,\\)]*\\)")){
+                            tempFormula =  tempFormula.replaceFirst("<>", "!=");
+                        }
 
-                rezult = "rezult = ("+tempOrFormula+ " ;";
-                System.out.println("OR-iteration value is "+ rezult);
-                rezult = processFormula(incFormula.replace(mOR.group(), String.valueOf(createBooleanClassOf(rezult))));
-            }
-            else {
-
-                // process if expression
-                //   Pattern pIf = Pattern.compile("IF\\([^\\(\\),]*,[^\\(\\),]*,[^\\(,\\)]*\\)");
-                Matcher mIf = Pattern.compile("IF\\([^\\(\\),]*,[^A-Z,\\(]*,[^A-Z,\\(\\)]*\\)").matcher(incFormula);
-                if (mIf.find()){
-                    String tempFormula = mIf.group();
-                    //if (tempFormula.matches("IF\\([^\\=<>A-Z]*=[^\\=,<>]*,[^A-Z,]*,[^A-Z,\\)]*\\)")){
-                    if (tempFormula.matches("IF\\([^\\=<>]*=[^\\=,<>]*,[^A-Z,]*,[^A-Z,\\)]*\\)")){
-                        tempFormula =  tempFormula.replaceFirst("=", "==");
+                        tempFormula =  tempFormula.replaceFirst("IF\\(", "");       
+                        tempFormula =  tempFormula.replaceFirst(",", " ){ rezult= (double) ");
+                        tempFormula = tempFormula.replaceFirst(",", " ;} else { rezult= (double) ");
+                        tempFormula = tempFormula.substring(0, (tempFormula.length()-1));
+                        tempFormula = "if ( " + tempFormula+ ";}";
+                        System.out.println("IF-iteration value is "+ tempFormula);
+                        rezult = processFormula(incFormula.replace(mIf.group(), createClassOf(tempFormula).toString()));
                     }
-                    if (tempFormula.matches("IF\\([^\\=A-Z]*<>[^\\=,]*,[^A-Z,]*,[^A-Z,\\)]*\\)")){
-                        tempFormula =  tempFormula.replaceFirst("<>", "!=");
-                    }
-
-                    tempFormula =  tempFormula.replaceFirst("IF\\(", "");       
-                    tempFormula =  tempFormula.replaceFirst(",", " ){ rezult= (double) ");
-                    tempFormula = tempFormula.replaceFirst(",", " ;} else { rezult= (double) ");
-                    tempFormula = tempFormula.substring(0, (tempFormula.length()-1));
-                    tempFormula = "if ( " + tempFormula+ ";}";
-                    System.out.println("IF-iteration value is "+ tempFormula);
-                    rezult = processFormula(incFormula.replace(mIf.group(), createClassOf(tempFormula).toString()));
                 }
             }
-        }}
+        }
         return rezult;
     }
-    
-//    private String processBooleanFormula(String incFormula){
-//        System.out.println("Recieved boolean expression for processing " +incFormula);
-//        String rezult = "rezult= "+ incFormula + ";";
-//      //  boolean rezu =  (1.0>3.0 )|( 5.0>6.0 )|( 8.0 != 8.0 )|( 4.0 == 4.0) ; 
-////      Double rr ;
-////      if ( 5.0==2 ){ rr=(double) 5.0 ;} else { rr= (double) 1;};
-////      rr= 1;
-//      
-//        return "rezult= "+ createClassOf(rezult).toString()+";";
-//        
-//    }
-    
-    
+
     // replace named cells with cell addreses
     private String processNamedCells(String cell){
         String rezult = cell;
@@ -209,18 +152,14 @@ public class AnalyzeExcelFile {
             Matcher mCell = Pattern.compile("([^a-zA-Z0-9\"]|^)"+pair.getKey()+"([^a-zA-Z0-9\"]|$)").matcher(rezult);
             while (mCell.find()){
                 String s = mCell.group().replaceFirst(pair.getKey(), pair.getValue());
-            //    System.out.println("replace number "+ mCell.group() +" with "+ s);
                 rezult = rezult.replace(mCell.group(), s);
             }
-            //rezult = rezult.replaceFirst(pair.getKey()+"$", pair.getValue().toString()); 
         }
         return rezult;
     }
     
-    
     // replace addreses of numeric cells with numbers
     private String processNumbersOfFormula(String cell){
-        //String rezult = cell.getCellFormula();
         String rezult = cell;
         Iterator<Map.Entry<String, Double>> it = table.entrySet().iterator();
         
@@ -230,7 +169,6 @@ public class AnalyzeExcelFile {
             Matcher mCell = Pattern.compile(pair.getKey()+"\\D").matcher(rezult);
             while (mCell.find()){
                 String s = mCell.group().replaceFirst(pair.getKey(), pair.getValue().toString());
-            //    System.out.println("replace number "+ mCell.group() +" with "+ s);
                 rezult = rezult.replace(mCell.group(), s);
             }
             rezult = rezult.replaceFirst(pair.getKey()+"$", pair.getValue().toString()); 
@@ -248,9 +186,7 @@ public class AnalyzeExcelFile {
             while (mCell.find()){
                 String s = mCell.group().substring(0, (mCell.group().length()-1));
                 rezult= rezult.replaceAll(s, "\""+ pair.getValue()+"\"");
-            //    System.out.println("replace string "+ mCell.group() +" with "+ pair.getValue());
             }
-            //rezult= rezult.replaceAll(pair.getKey(), "\""+ pair.getValue()+"\"");
         }
         return rezult;
     }
@@ -265,13 +201,12 @@ public class AnalyzeExcelFile {
                 Cell cell = cellIterator.next();
                 if(cell.getCellType() == Cell.CELL_TYPE_NUMERIC){
                     table.put(String.valueOf(alphabet[cell.getColumnIndex()])+String.valueOf(cell.getRowIndex()+1), cell.getNumericCellValue());
-                //    System.out.println("put " + String.valueOf(alphabet[cell.getColumnIndex()])+String.valueOf(cell.getRowIndex()+1)+ " "+ cell.getNumericCellValue());
                 }
             }
         }
     }
     
-        // get numeric values only and put into table hashMap
+    // get numeric values only and put into table hashMap
     private void fillTableStr (HSSFSheet sheet){
         Iterator<Row> rowIterator = sheet.iterator();
         // получаем Iterator по всем ячейкам в строке
@@ -281,7 +216,6 @@ public class AnalyzeExcelFile {
                 Cell cell = cellIterator.next();
                 if(cell.getCellType() == Cell.CELL_TYPE_STRING){
                     tableStr.put(String.valueOf(alphabet[cell.getColumnIndex()])+String.valueOf(cell.getRowIndex()+1), cell.getStringCellValue());
-                //    System.out.println("put " + String.valueOf(alphabet[cell.getColumnIndex()])+String.valueOf(cell.getRowIndex()+1)+ " "+ cell.getStringCellValue());
                 }
             }
         }
@@ -300,34 +234,19 @@ public class AnalyzeExcelFile {
     
     private String converter (String cell){
         String rezult=cell;
-        
-        // if there's a cell address
-//        Pattern pCELL = Pattern.compile("^[A_Z]\\d$");
-//        Matcher mCELL = pCELL.matcher(cell);
-//        if (mCELL.find()){
-//            rezult =  cell+"- cell address";
-//            System.out.println("cell address "+ cell);
-//        }        
-        
         // if there's a number value
         Pattern pNUMB = Pattern.compile("^\\d+(\\.\\d+)?$");
         Matcher mNUMB = pNUMB.matcher(cell);
         if (mNUMB.find()){
             rezult =  cell+"- number";
-        //    System.out.println("number "+ cell);
         }
-        
         // if there's a SUM function
         Pattern pSUM = Pattern.compile("SUM");
         Matcher mSUM = pSUM.matcher(cell);
         if (mSUM.find()){
             rezult =  cell+"- summa" ;
             System.out.println("summa "+ cell);
-          //  FormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
-           // CellValue cellValue = evaluator.evaluate(cell);
         }
-        
-       
         return rezult;
     }
     
