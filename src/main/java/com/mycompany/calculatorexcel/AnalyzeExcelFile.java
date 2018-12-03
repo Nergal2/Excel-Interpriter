@@ -74,6 +74,17 @@ public class AnalyzeExcelFile {
                 rezult = rezult+" "+type;
             }
         }
+        // данный код позволяет менять excel файл и получать вычисленные значения для ячейки
+        // то же самое, что и FormulaEvaluator, делает весь остальной проект
+//                    FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+//                    // CellValue
+//                    HSSFCell cell1 = sheet.getRow(0).getCell(0);
+//                    cell1.setCellValue(cell1.getNumericCellValue() +50);
+//                    cell.setCellFormula("SUM(A1:A2)");
+//                    CellValue cellValue = evaluator.evaluate(cell);
+//                    Double value = cellValue.getNumberValue();
+//                    System.out.println("evaluator value is "+ value.toString());
+        
         return rezult;
     }
     
@@ -140,16 +151,6 @@ public class AnalyzeExcelFile {
             }
         }
         
-                // данный код позволяет менять excel файл и получать вычисленные значения для ячейки
-        // то же самое, что и FormulaEvaluator, делает весь остальной проект
-//                    FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-//                    // CellValue
-//                    HSSFCell cell1 = sheet.getRow(0).getCell(0);
-//                    cell1.setCellValue(cell1.getNumericCellValue() +50);
-//                    cell.setCellFormula("SUM(A1:A2)");
-//                    CellValue cellValue = evaluator.evaluate(cell);
-//                    Double value = cellValue.getNumberValue();
-//                    System.out.println("evaluator value is "+ value.toString());
         return rezult;
     }
 
