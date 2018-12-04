@@ -20,13 +20,13 @@ import javax.ws.rs.core.Response;
  */
 @Path("/rest")
 public class Restinterface {
-   
+
     @GET
     @Path("/echo")
     public String echo(@QueryParam("q") String original) {
         return original;
     }
-    
+
     @GET
     @Path("/try")
     public String fileTrying() throws IOException {
@@ -35,17 +35,17 @@ public class Restinterface {
         String rezult = af.analyze();
         return rezult;
     }
-        
+
     /**
      * set excel file with request
      *
      * @param path - path
-     */    
+     */
     @POST
     @Path("/file")
     @Produces({MediaType.TEXT_PLAIN})
 //    @Consumes(MediaType.APPLICATION_JSON)    
-    public Response setFile(String path){
+    public Response setFile(String path) {
         String result = "ok";
         return Response.ok(result).build();
     }
