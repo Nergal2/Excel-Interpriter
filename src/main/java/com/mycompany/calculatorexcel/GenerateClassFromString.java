@@ -26,19 +26,20 @@ import javax.tools.ToolProvider;
  * @author Nergal
  */
 public class GenerateClassFromString {
-    public static Double createClassOf(String s){
+
+    public static Double createClassOf(String s) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
         StringWriter writer = new StringWriter();
         PrintWriter out = new PrintWriter(writer);
         String code = "public class AnotherClass {";
-        code = code +"  public static Double main(String args[]) {";
+        code = code + "  public static Double main(String args[]) {";
         code = code + "Double rezult ;";
-        code = code +  s;
-        code = code +"    System.out.println(\" value of s is \"+rezult.toString());";
-        code = code +"    return rezult;";
-        code = code +"  }";
-        code = code +"};";
+        code = code + s;
+        code = code + "    System.out.println(\" value of s is \"+rezult.toString());";
+        code = code + "    return rezult;";
+        code = code + "  }";
+        code = code + "};";
         out.print(code);
         out.flush();
         out.close();
@@ -47,10 +48,11 @@ public class GenerateClassFromString {
         Iterable<? extends JavaFileObject> compilationUnits = Arrays.asList(file1);
         JavaCompiler.CompilationTask task = compiler.getTask(null, null, diagnostics, null, null, compilationUnits);
         boolean success = task.call();
-        for (Diagnostic<?> diagnostic : diagnostics.getDiagnostics())
-            System.out.println("diagnostic is "+diagnostic);
+        for (Diagnostic<?> diagnostic : diagnostics.getDiagnostics()) {
+            System.out.println("diagnostic is " + diagnostic);
+        }
         System.out.println("Compilation success: " + success);
-        
+
         Double rez = 0.0;
         if (success) {
             try {
@@ -58,43 +60,44 @@ public class GenerateClassFromString {
                 // create class instance
                 Class my = loader.getClassFromFile(new File("AnotherClass.class"));
                 // use method main
-                Method m = my.getMethod("main", new Class[] { String[].class });
+                Method m = my.getMethod("main", new Class[]{String[].class});
                 Object o = my.newInstance();
                 // call selected method and get the rezult
-                rez = (Double) m.invoke(o, new Object[] { new String[0] });
+                rez = (Double) m.invoke(o, new Object[]{new String[0]});
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return rez;
     }
-    
-    public static boolean createBooleanClassOf(String s){
+
+    public static boolean createBooleanClassOf(String s) {
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
         StringWriter writer = new StringWriter();
         PrintWriter out = new PrintWriter(writer);
         String code = "public class AnotherClass {";
-        code = code +"  public static boolean main(String args[]) {";
+        code = code + "  public static boolean main(String args[]) {";
         code = code + "boolean rezult ;";
-        code = code +  s;
-        code = code +"    System.out.println(\" value of s is \"+String.valueOf(rezult));";
-        code = code +"    return rezult;";
-        code = code +"  }";
-        code = code +"};";
+        code = code + s;
+        code = code + "    System.out.println(\" value of s is \"+String.valueOf(rezult));";
+        code = code + "    return rezult;";
+        code = code + "  }";
+        code = code + "};";
         out.print(code);
         out.flush();
         out.close();
         JavaFileObject file1 = new JavaSourceFromString("AnotherClass", writer.toString());
-        
+
         Iterable<? extends JavaFileObject> compilationUnits = Arrays.asList(file1);
         JavaCompiler.CompilationTask task = compiler.getTask(null, null, diagnostics, null, null, compilationUnits);
         boolean success = task.call();
-        for (Diagnostic<?> diagnostic : diagnostics.getDiagnostics())
-            System.out.println("diagnostic is "+diagnostic);
+        for (Diagnostic<?> diagnostic : diagnostics.getDiagnostics()) {
+            System.out.println("diagnostic is " + diagnostic);
+        }
         System.out.println("Compilation success: " + success);
-        
+
         boolean rez = false;
         if (success) {
             try {
@@ -102,31 +105,32 @@ public class GenerateClassFromString {
                 // create class instance
                 Class my = loader.getClassFromFile(new File("AnotherClass.class"));
                 // use method main
-                Method m = my.getMethod("main", new Class[] { String[].class });
+                Method m = my.getMethod("main", new Class[]{String[].class});
                 Object o = my.newInstance();
                 // call selected method and get the rezult
-                rez = (boolean) m.invoke(o, new Object[] { new String[0] });
+                rez = (boolean) m.invoke(o, new Object[]{new String[0]});
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return rez;
     }
-    
+
     static class JavaSourceFromString extends SimpleJavaFileObject {
-    final String code;
- 
+
+        final String code;
+
         JavaSourceFromString(String name, String code) {
             super(URI.create("string:///" + name.replace('.', '/') + JavaFileObject.Kind.SOURCE.extension), JavaFileObject.Kind.SOURCE);
             this.code = code;
         }
- 
+
         @Override
         public CharSequence getCharContent(boolean ignoreEncodingErrors) {
             return code;
         }
     }
-    
+
     static class MyClassLoader extends ClassLoader {
 
         public Class getClassFromFile(File f) {
@@ -140,8 +144,9 @@ public class GenerateClassFromString {
                 e.printStackTrace();
             }
             try {
-                if (in != null)
+                if (in != null) {
                     in.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
